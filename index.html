@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#111111"/>
+<title>TimberCalc</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<link rel="manifest" href="manifest.json"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#e8e8e8;display:flex;justify-content:center;padding:20px;min-height:100vh;}
+input,select,textarea,button{font-family:inherit;font-size:13px;border-radius:6px;outline:none;}
+input,select,textarea{border:1px solid #ccc;padding:6px 8px;background:#fff;color:#111;width:100%;}
+textarea{resize:vertical;}
+button{border:1px solid #bbb;background:#fff;padding:7px 14px;cursor:pointer;color:#111;}
+button:hover{background:#f0f0f0;}
+.btn-primary{background:#111;color:#fff;border-color:#111;}
+.btn-primary:hover{background:#333;}
+label{font-size:10px;color:#777;display:block;margin-bottom:2px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;}
+.phone{width:390px;background:#f4f4f4;border-radius:24px;border:1px solid #bbb;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);}
+.topbar{padding:13px 16px 10px;border-bottom:1px solid #ddd;background:#fff;display:flex;justify-content:space-between;align-items:center;}
+.topbar-title{font-size:17px;font-weight:600;color:#111;}
+.screen{padding:14px 16px;display:none;overflow-y:auto;max-height:590px;min-height:480px;}
+.screen.active{display:block;}
+.card{background:#fff;border-radius:10px;border:1px solid #e0e0e0;padding:12px;margin-bottom:12px;}
+.sec-label{font-size:10px;font-weight:700;color:#888;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
+.gap-col{display:flex;flex-direction:column;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.empty-msg{text-align:center;padding:28px 0;color:#bbb;font-size:13px;}
+.bill-banner{background:#111;color:#fff;border-radius:8px;padding:9px 14px;margin-bottom:12px;cursor:pointer;display:none;font-size:12px;}
+.settings-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border-radius:10px;border:1px solid #e0e0e0;margin-bottom:8px;cursor:pointer;}
+.settings-item:hover{background:#f9f9f9;}
+.settings-item-left{display:flex;align-items:center;gap:10px;}
+.settings-item-icon{width:34px;height:34px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;color:#444;}
+.sub-screen{display:none;padding:14px 16px;min-height:480px;max-height:590px;overflow-y:auto;}
+.sub-screen.active{display:block;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#111;background:none;border:none;padding:0;margin-bottom:14px;cursor:pointer;}
+.hist-item{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:11px 13px;margin-bottom:8px;}
+.hist-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:#f0f0f0;color:#555;border:1px solid #ddd;}
+.hist-badge.bill{background:#111;color:#fff;border-color:#111;}
+.bottomnav{display:flex;border-top:1px solid #ddd;background:#fff;}
+.nav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 6px 10px;cursor:pointer;color:#aaa;font-size:10px;font-weight:500;}
+.nav-btn.active{color:#111;}
+.nav-btn i{font-size:20px;}
+.species-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.species-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;}
+.species-opt.selected{border-color:#111;background:#f9f9f9;}
+.species-opt input[type=radio]{accent-color:#111;width:14px;height:14px;cursor:pointer;}
+.species-opt label{font-size:13px;color:#111;font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer;margin:0;}
+.calc-table-wrap{background:#fff;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.calc-table-header{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 62px 26px;gap:3px;padding:6px 8px;background:#111;color:#fff;font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;align-items:center;}
+.calc-row{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 62px 26px;gap:3px;padding:5px 8px;border-top:1px solid #f0f0f0;align-items:center;}
+.calc-row input{padding:5px 4px;font-size:12px;text-align:center;border:1px solid #ddd;border-radius:5px;}
+.cft-badge{background:#f0f0f0;border-radius:5px;padding:5px 3px;font-size:10px;font-weight:600;text-align:center;color:#111;}
+.del-btn{background:none;border:none;padding:2px;cursor:pointer;color:#ccc;display:flex;align-items:center;justify-content:center;}
+.del-btn:hover{color:#e00;}
+.summary-strip{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 12px;}
+.summary-strip .lbl{font-size:10px;color:#888;text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px;}
+.summary-strip .val{font-size:13px;font-weight:600;color:#111;}
+
+/* Login screen */
+#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:30px;}
+#login-screen.hidden{display:none;}
+.login-logo{font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;}
+.login-sub{font-size:13px;color:#888;margin-bottom:48px;}
+.google-btn{display:flex;align-items:center;gap:12px;background:#fff;color:#111;border:none;border-radius:8px;padding:14px 24px;font-size:14px;font-weight:600;cursor:pointer;width:100%;max-width:280px;justify-content:center;}
+.google-btn:hover{background:#f0f0f0;}
+.google-btn img{width:20px;height:20px;}
+.user-chip{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.user-avatar{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;}
+
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:8px;font-size:12px;z-index:999;display:none;white-space:nowrap;}
+.toast.show{display:block;}
+
+/* INVOICE */
+#invoice-paper{background:#fff;padding:22px 20px;color:#000;font-family:Arial,sans-serif;border:1px solid #ccc;}
+.inv-header{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:10px;}
+.inv-shop-name{font-size:18px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:Georgia,serif;}
+.inv-shop-sub{font-size:9.5px;color:#333;margin-top:3px;}
+.inv-label-tag{font-size:10px;font-weight:700;letter-spacing:4px;border:1px solid #000;display:inline-block;padding:3px 16px;margin:8px 0;}
+.inv-meta{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:8px;}
+.inv-meta td{border:0.5px solid #000;padding:4px 7px;vertical-align:top;}
+.inv-meta .lbl{color:#555;font-size:8px;display:block;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;}
+.inv-items{width:100%;border-collapse:collapse;font-size:9px;table-layout:fixed;}
+.inv-items th{border:0.5px solid #000;padding:5px;background:#000;color:#fff;font-weight:600;font-size:8.5px;letter-spacing:0.4px;text-transform:uppercase;}
+.inv-items td{border:0.5px solid #000;padding:4px 5px;}
+.inv-items .sub-row td{background:#e8e8e8;font-weight:700;font-size:9px;}
+.inv-totals{width:48%;margin-left:52%;border-collapse:collapse;font-size:9.5px;}
+.inv-totals td{border:0.5px solid #000;padding:3px 7px;}
+.inv-totals .grand td{font-weight:700;background:#000;color:#fff;padding:4px 7px;}
+.inv-terms{margin-top:8px;font-size:8.5px;color:#444;border-top:0.5px solid #bbb;padding-top:6px;display:none;}
+.inv-sig{display:flex;justify-content:space-between;margin-top:30px;font-size:9.5px;color:#333;}
+.sig-blk{text-align:center;width:38%;}
+.sig-line{border-top:0.5px solid #000;padding-top:4px;margin-top:22px;}
+.inv-actions{display:flex;gap:8px;margin-top:12px;}
+
+/* Sheets history table */
+.sheets-table{width:100%;border-collapse:collapse;font-size:12px;}
+.sheets-table th{background:#111;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}
+.sheets-table td{padding:8px 10px;border-bottom:1px solid #eee;vertical-align:middle;}
+.sheets-table tr:hover td{background:#f9f9f9;}
+.view-btn{font-size:11px;padding:3px 10px;background:#111;color:#fff;border:none;border-radius:5px;cursor:pointer;}
+
+@media print{
+  .no-print{display:none!important;}
+  body{background:#fff;padding:0;}
+  .phone{box-shadow:none;border:none;width:100%;border-radius:0;}
+  #invoice-paper{border:none;}
+  .bottomnav,.topbar,#login-screen{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-logo">🪵 TimberCalc</div>
+  <div class="login-sub">GST Invoice & CFT Calculator</div>
+  <button class="google-btn" id="google-login-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+    Sign in with Google
+  </button>
+  <div style="font-size:11px;color:#555;margin-top:20px;">Your bills are saved to your Google Sheet</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<div class="phone" id="main-app" style="display:none;">
+  <div class="topbar no-print">
+    <div class="topbar-title" id="topbar-title">Calculator</div>
+    <div class="user-chip" id="user-chip" title="Sign out">
+      <img class="user-avatar" id="user-avatar" src="" alt=""/>
+    </div>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div class="screen active" id="screen-calc">
+    <div class="bill-banner" id="bill-banner">
+      <div style="display:flex;justify-content:space-between;"><span id="bill-count">0 groups in bill</span><span id="bill-total-preview">₹0</span></div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Tap to open bill →</div>
+    </div>
+    <div class="sec-label">Wood species</div>
+    <div class="species-group">
+      <div class="species-opt selected" data-val="Indian Teak"><input type="radio" name="species" id="sp1" value="Indian Teak" checked/><label for="sp1">Indian Teak</label></div>
+      <div class="species-opt" data-val="African Teak"><input type="radio" name="species" id="sp2" value="African Teak"/><label for="sp2">African Teak</label></div>
+      <div class="species-opt" data-val="other"><input type="radio" name="species" id="sp3" value="other"/><label for="sp3">Other</label><input type="text" id="sp-other-text" placeholder="Species name" style="display:none;flex:1;margin-left:6px;padding:4px 7px;font-size:12px;" oninput="recalcAll()"/></div>
+    </div>
+    <div class="calc-table-wrap">
+      <div class="calc-table-header">
+        <span>#</span><span>Pcs</span><span>L(ft)</span><span>W(in)</span><span>T(in)</span><span>CFT</span><span></span>
+      </div>
+      <div id="calc-rows"></div>
+    </div>
+    <button id="add-row-btn" style="width:100%;padding:7px;font-size:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-plus" style="font-size:14px;"></i> Add row (max 8)</button>
+    <div class="summary-strip">
+      <div style="flex:1;"><div class="lbl">Total CFT</div><div class="val" id="total-cft">0.0000</div></div>
+      <div style="color:#ccc;font-size:18px;">×</div>
+      <div style="flex:1;margin:0 8px;"><div class="lbl">Price/CFT (₹)</div><input type="number" id="rate" value="4000" step="50" style="padding:5px 8px;font-size:13px;font-weight:600;"/></div>
+      <div style="text-align:right;"><div class="lbl">Total cost</div><div class="val" id="total-cost" style="font-size:15px;">₹0</div></div>
+    </div>
+    <button class="btn-primary" id="add-bill-btn" style="width:100%;padding:10px;font-size:13px;font-weight:600;">+ Add to bill</button>
+  </div>
+
+  <!-- BILL -->
+  <div class="screen" id="screen-bill">
+    <div id="bill-edit">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+        <div><div id="shop-sum-name" style="font-size:13px;font-weight:600;">No enterprise details</div><div id="shop-sum-sub" style="font-size:11px;color:#aaa;">Set up in Settings</div></div>
+        <button id="go-settings-btn" style="font-size:11px;padding:5px 10px;"><i class="ti ti-settings" style="font-size:13px;vertical-align:-2px;"></i> Edit</button>
+      </div>
+      <div class="sec-label">Customer details</div>
+      <div class="card gap-col" style="margin-bottom:12px;">
+        <div><label>Customer name</label><input type="text" id="cust-name" placeholder="Ramesh Kumar"/></div>
+        <div><label>Phone number</label><input type="text" id="cust-phone" placeholder="98xxxxxxxx"/></div>
+        <div><label>Vehicle number</label><input type="text" id="cust-vehicle" placeholder="TN 01 AB 1234"/></div>
+        <div><label>Customer GSTIN (optional)</label><input type="text" id="cust-gst" placeholder="29ABCDE..."/></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="sec-label" style="margin:0;">Bill items</span>
+      </div>
+      <div id="bill-items"></div>
+      <div class="empty-msg" id="bill-empty">No items yet. Add from Calculator.</div>
+      <div class="card" style="margin-top:12px;">
+        <div class="sec-label">GST rates</div>
+        <div class="row3">
+          <div><label>CGST %</label><input type="number" id="cgst-pct" value="0" step="0.5"/></div>
+          <div><label>SGST %</label><input type="number" id="sgst-pct" value="0" step="0.5"/></div>
+          <div><label>IGST %</label><input type="number" id="igst-pct" value="0" step="0.5"/></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="gen-bill-btn" style="width:100%;padding:10px;font-size:13px;font-weight:600;margin-top:12px;">Generate &amp; Save Bill</button>
+    </div>
+
+    <!-- INVOICE -->
+    <div id="bill-invoice" style="display:none;">
+      <div id="invoice-paper">
+        <div class="inv-header">
+          <div class="inv-shop-name" id="inv-sname"></div>
+          <div class="inv-shop-sub" id="inv-saddr"></div>
+          <div class="inv-shop-sub" id="inv-scontact"></div>
+        </div>
+        <div style="text-align:center;"><span class="inv-label-tag">TAX INVOICE</span></div>
+        <table class="inv-meta">
+          <tr><td style="width:50%;"><span class="lbl">Bill to</span><strong id="inv-cname"></strong></td><td><span class="lbl">Invoice no.</span><strong id="inv-num"></strong></td></tr>
+          <tr><td><span class="lbl">Phone</span><span id="inv-cphone"></span></td><td><span class="lbl">Date</span><span id="inv-date"></span></td></tr>
+          <tr><td><span class="lbl">Vehicle no.</span><span id="inv-vehicle"></span></td><td><span class="lbl">Supplier GSTIN</span><span id="inv-sgst-no"></span></td></tr>
+          <tr><td><span class="lbl">Customer GSTIN</span><span id="inv-cgst-no"></span></td><td></td></tr>
+        </table>
+        <table class="inv-items">
+          <thead><tr>
+            <th style="width:7%;text-align:center;">S.No</th>
+            <th style="text-align:left;">Particulars</th>
+            <th style="width:10%;text-align:center;">Pcs</th>
+            <th style="width:15%;text-align:right;">CFT</th>
+            <th style="width:15%;text-align:right;">Rate/CFT</th>
+            <th style="width:18%;text-align:right;">Amount (₹)</th>
+          </tr></thead>
+          <tbody id="inv-rows"></tbody>
+        </table>
+        <table class="inv-totals">
+          <tr><td style="color:#555;">Subtotal</td><td style="text-align:right;" id="inv-sub"></td></tr>
+          <tr><td style="color:#555;" id="inv-cl">CGST (0%)</td><td style="text-align:right;" id="inv-cv"></td></tr>
+          <tr><td style="color:#555;" id="inv-sl">SGST (0%)</td><td style="text-align:right;" id="inv-sv"></td></tr>
+          <tr><td style="color:#555;" id="inv-il">IGST (0%)</td><td style="text-align:right;" id="inv-iv"></td></tr>
+          <tr class="grand"><td>Grand Total</td><td style="text-align:right;" id="inv-grand"></td></tr>
+        </table>
+        <div class="inv-terms" id="inv-terms-blk"><strong>Terms &amp; Conditions:</strong> <span id="inv-terms-txt"></span></div>
+        <div class="inv-sig">
+          <div class="sig-blk"><div class="sig-line">Customer signature</div></div>
+          <div class="sig-blk"><div class="sig-line">Authorized signature</div></div>
+        </div>
+      </div>
+      <div class="inv-actions no-print">
+        <button id="edit-inv-btn" style="flex:1;padding:10px;font-weight:500;">Edit</button>
+        <button class="btn-primary" id="print-inv-btn" style="flex:1;padding:10px;font-weight:600;"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;"></i> Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="screen-settings">
+    <div class="settings-item" id="s-enterprise">
+      <div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-building-store"></i></div><div><div style="font-size:13px;font-weight:500;">Enterprise details</div><div style="font-size:11px;color:#aaa;">Shop name, GSTIN, address</div></div></div>
+      <i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i>
+    </div>
+    <div class="settings-item" id="s-billhist">
+      <div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-table"></i></div><div><div style="font-size:13px;font-weight:500;">Bill history</div><div style="font-size:11px;color:#aaa;">View bills saved in Google Sheets</div></div></div>
+      <i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i>
+    </div>
+    <div class="settings-item" id="s-calchist">
+      <div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-calculator"></i></div><div><div style="font-size:13px;font-weight:500;">Calculation history</div><div style="font-size:11px;color:#aaa;">View past CFT calculations</div></div></div>
+      <i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i>
+    </div>
+    <div class="settings-item" id="s-signout">
+      <div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-logout"></i></div><div><div style="font-size:13px;font-weight:500;">Sign out</div><div style="font-size:11px;color:#aaa;" id="signed-in-as">Signed in as —</div></div></div>
+    </div>
+  </div>
+
+  <!-- SUB: ENTERPRISE -->
+  <div class="sub-screen" id="sub-enterprise">
+    <button class="back-btn" id="back-from-ent"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Enterprise details</div>
+    <div class="card gap-col">
+      <div><label>Shop or enterprise name</label><input type="text" id="set-name" placeholder="Sri Ganesh Timbers"/></div>
+      <div><label>GSTIN</label><input type="text" id="set-gst" placeholder="29ABCDE1234F1Z5"/></div>
+      <div><label>Address</label><input type="text" id="set-addr" placeholder="Door no, street, city"/></div>
+      <div><label>Phone number</label><input type="text" id="set-phone" placeholder="98xxxxxxxx"/></div>
+      <div><label>Terms and conditions</label><textarea id="set-terms" rows="3" placeholder="e.g. Goods once sold will not be taken back."></textarea></div>
+    </div>
+    <button class="btn-primary" id="save-ent-btn" style="width:100%;padding:10px;font-weight:600;">Save details</button>
+    <div id="ent-saved" style="text-align:center;font-size:12px;color:green;margin-top:8px;display:none;">Saved successfully.</div>
+  </div>
+
+  <!-- SUB: BILL HISTORY -->
+  <div class="sub-screen" id="sub-billhist">
+    <button class="back-btn" id="back-from-bh"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Bill history (Google Sheets)</div>
+    <div id="bill-hist-list"><div class="empty-msg">Loading...</div></div>
+  </div>
+
+  <!-- SUB: CALC HISTORY -->
+  <div class="sub-screen" id="sub-calchist">
+    <button class="back-btn" id="back-from-ch"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Calculation history</div>
+    <div id="calc-hist-list"><div class="empty-msg">No calculations yet.</div></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="bottomnav no-print">
+    <button class="nav-btn active" data-screen="calc" data-title="Calculator"><i class="ti ti-calculator"></i><span>Calculate</span></button>
+    <button class="nav-btn" data-screen="bill" data-title="Bill"><i class="ti ti-receipt"></i><span>Bill</span></button>
+    <button class="nav-btn" data-screen="settings" data-title="Settings"><i class="ti ti-settings"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+const CLIENT_ID = '1061996485750-p44qfe053lqu9bs3s4i4kvpnaub7dknn.apps.googleusercontent.com';
+const API_KEY   = 'AIzaSyCQYit6w70jKMQW1yKlVuuoKxITYTQmaec';
+const SHEET_ID  = '13MfMoqBZhYx1wcufzv0Cqu7ZVioVt_yL6wVhALkEakY';
+const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets';
+
+let tokenClient, accessToken = null, currentUser = null;
+let invCounter = 1001;
+let bill = [], calcHistory = [];
+let shop = { name:'', gst:'', addr:'', phone:'', terms:'' };
+let rows = [], nextId = 1;
+const MAX_ROWS = 8;
+
+// ---- Google Login ----
+window.addEventListener('load', () => {
+  // Try restore session
+  const saved = sessionStorage.getItem('timber_token');
+  const savedUser = sessionStorage.getItem('timber_user');
+  if (saved && savedUser) {
+    accessToken = saved;
+    currentUser = JSON.parse(savedUser);
+    showApp();
+  }
+
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredentialResponse
+  });
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showToast('Auth error: ' + resp.error); return; }
+      accessToken = resp.access_token;
+      sessionStorage.setItem('timber_token', accessToken);
+      showApp();
+    }
+  });
+
+  document.getElementById('google-login-btn').addEventListener('click', () => {
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      }
+    });
+  });
+});
+
+function handleCredentialResponse(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
+  sessionStorage.setItem('timber_user', JSON.stringify(currentUser));
+  tokenClient.requestAccessToken({ prompt: '' });
+}
+
+function showApp() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('main-app').style.display = 'block';
+  if (currentUser) {
+    document.getElementById('user-avatar').src = currentUser.picture || '';
+    document.getElementById('signed-in-as').textContent = 'Signed in as ' + (currentUser.email || '');
+  }
+  ensureSheetHeaders();
+  addRow();
+}
+
+document.getElementById('user-chip').addEventListener('click', () => {
+  if (confirm('Sign out?')) { sessionStorage.clear(); location.reload(); }
+});
+document.getElementById('s-signout').addEventListener('click', () => {
+  if (confirm('Sign out?')) { sessionStorage.clear(); location.reload(); }
+});
+
+// ---- Sheets API ----
+async function sheetsRequest(method, endpoint, body) {
+  const base = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID;
+  const res = await fetch(base + endpoint, {
+    method,
+    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  return res.json();
+}
+
+async function ensureSheetHeaders() {
+  const data = await sheetsRequest('GET', '/values/Sheet1!A1:E1');
+  if (!data.values || data.values[0][0] !== 'Date') {
+    await sheetsRequest('PUT', '/values/Sheet1!A1:E1?valueInputOption=RAW', {
+      values: [['Date', 'Invoice No', 'Customer Name', 'Vehicle No', 'Bill Data (JSON)']]
+    });
+  }
+}
+
+async function saveBillToSheet(invNum, custName, vehicle, billJSON) {
+  const date = new Date().toLocaleDateString('en-IN');
+  await sheetsRequest('POST', '/values/Sheet1!A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS', {
+    values: [[date, invNum, custName, vehicle, billJSON]]
+  });
+  showToast('✅ Bill saved to Google Sheets');
+}
+
+async function loadBillHistory() {
+  const el = document.getElementById('bill-hist-list');
+  el.innerHTML = '<div class="empty-msg">Loading from Google Sheets...</div>';
+  try {
+    const data = await sheetsRequest('GET', '/values/Sheet1!A2:E');
+    if (!data.values || data.values.length === 0) {
+      el.innerHTML = '<div class="empty-msg">No bills saved yet.</div>';
+      return;
+    }
+    let html = '<table class="sheets-table"><thead><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Vehicle</th><th></th></tr></thead><tbody>';
+    data.values.forEach((row, i) => {
+      html += `<tr>
+        <td>${row[0]||''}</td>
+        <td style="font-weight:600;">${row[1]||''}</td>
+        <td>${row[2]||''}</td>
+        <td>${row[3]||''}</td>
+        <td><button class="view-btn" data-idx="${i}">View</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+    el.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rowData = data.values[parseInt(btn.dataset.idx)];
+        if (rowData && rowData[4]) viewSavedBill(rowData[4]);
+      });
+    });
+  } catch(e) {
+    el.innerHTML = '<div class="empty-msg">Error loading. Check internet.</div>';
+  }
+}
+
+function viewSavedBill(jsonStr) {
+  try {
+    const data = JSON.parse(jsonStr);
+    renderInvoiceFromData(data);
+    goMain('bill', 'Bill');
+    document.getElementById('bill-edit').style.display = 'none';
+    document.getElementById('bill-invoice').style.display = 'block';
+  } catch(e) { showToast('Could not load bill'); }
+}
+
+// ---- Nav ----
+const navBtns = document.querySelectorAll('.nav-btn');
+const mainScreens = { calc:document.getElementById('screen-calc'), bill:document.getElementById('screen-bill'), settings:document.getElementById('screen-settings') };
+const subScreens = { enterprise:document.getElementById('sub-enterprise'), billhist:document.getElementById('sub-billhist'), calchist:document.getElementById('sub-calchist') };
+const topbarTitle = document.getElementById('topbar-title');
+
+function hideAll(){Object.values(mainScreens).forEach(s=>{s.classList.remove('active');s.style.display='none';});Object.values(subScreens).forEach(s=>{s.classList.remove('active');s.style.display='none';});}
+function goMain(k,t){hideAll();mainScreens[k].style.display='block';mainScreens[k].classList.add('active');topbarTitle.textContent=t;navBtns.forEach(b=>b.classList.toggle('active',b.dataset.screen===k));}
+function goSub(k,t){hideAll();subScreens[k].style.display='block';subScreens[k].classList.add('active');topbarTitle.textContent=t;navBtns.forEach(b=>b.classList.remove('active'));}
+navBtns.forEach(btn=>btn.addEventListener('click',()=>goMain(btn.dataset.screen,btn.dataset.title)));
+document.getElementById('s-enterprise').addEventListener('click',()=>{loadEntFields();goSub('enterprise','Enterprise details');});
+document.getElementById('s-billhist').addEventListener('click',()=>{loadBillHistory();goSub('billhist','Bill history');});
+document.getElementById('s-calchist').addEventListener('click',()=>{renderCalcHist();goSub('calchist','Calculation history');});
+document.getElementById('back-from-ent').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('back-from-bh').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('back-from-ch').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('bill-banner').addEventListener('click',()=>goMain('bill','Bill'));
+document.getElementById('go-settings-btn').addEventListener('click',()=>{loadEntFields();goSub('enterprise','Enterprise details');});
+
+// ---- Toast ----
+function showToast(msg, dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+// ---- Shop ----
+function loadEntFields(){document.getElementById('set-name').value=shop.name;document.getElementById('set-gst').value=shop.gst;document.getElementById('set-addr').value=shop.addr;document.getElementById('set-phone').value=shop.phone;document.getElementById('set-terms').value=shop.terms;}
+document.getElementById('save-ent-btn').addEventListener('click',()=>{
+  shop={name:document.getElementById('set-name').value.trim(),gst:document.getElementById('set-gst').value.trim(),addr:document.getElementById('set-addr').value.trim(),phone:document.getElementById('set-phone').value.trim(),terms:document.getElementById('set-terms').value.trim()};
+  localStorage.setItem('timber_shop',JSON.stringify(shop));
+  refreshShopCard();
+  const m=document.getElementById('ent-saved');m.style.display='block';setTimeout(()=>m.style.display='none',2000);
+});
+function refreshShopCard(){const n=document.getElementById('shop-sum-name'),s=document.getElementById('shop-sum-sub');if(shop.name){n.textContent=shop.name;s.textContent=(shop.phone||'No phone')+(shop.gst?' · '+shop.gst:'');}else{n.textContent='No enterprise details';s.textContent='Set up in Settings';}}
+// Restore shop from localStorage
+const savedShop=localStorage.getItem('timber_shop');if(savedShop){shop=JSON.parse(savedShop);refreshShopCard();}
+
+// ---- Species ----
+document.querySelectorAll('.species-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    document.querySelectorAll('.species-opt').forEach(o=>o.classList.remove('selected'));
+    opt.classList.add('selected');opt.querySelector('input[type=radio]').checked=true;
+    document.getElementById('sp-other-text').style.display=opt.dataset.val==='other'?'block':'none';
+  });
+});
+function getSpecies(){const sel=document.querySelector('input[name=species]:checked');if(!sel)return'Indian Teak';if(sel.value==='other'){const t=document.getElementById('sp-other-text').value.trim();return t||'Other wood';}return sel.value;}
+
+// ---- Calculator rows ----
+function calcRowCFT(r){return((parseFloat(r.pieces)||0)*(parseFloat(r.length)||0)*(parseFloat(r.width)||0)*(parseFloat(r.thick)||0))/144;}
+
+function recalcAll(){
+  let totalCFT=0;
+  rows.forEach(r=>{r.cft=calcRowCFT(r);totalCFT+=r.cft;const b=document.getElementById('cft-'+r.id);if(b)b.textContent=r.cft.toFixed(4);});
+  const rate=parseFloat(document.getElementById('rate').value)||0;
+  document.getElementById('total-cft').textContent=totalCFT.toFixed(4)+' CFT';
+  document.getElementById('total-cost').textContent='₹'+Math.round(totalCFT*rate).toLocaleString('en-IN');
+  const btn=document.getElementById('add-row-btn');btn.textContent=(rows.length>=MAX_ROWS?'Max 8 rows reached':'+ Add row ('+rows.length+'/8)');btn.disabled=rows.length>=MAX_ROWS;
+}
+
+function renderRows(){
+  const c=document.getElementById('calc-rows');c.innerHTML='';
+  rows.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='calc-row';
+    d.innerHTML=`<span style="font-size:11px;font-weight:600;color:#888;text-align:center;">${i+1}</span>
+      <input type="number" value="${r.pieces}" min="1" placeholder="Pcs" oninput="updateRow(${r.id},'pieces',this.value)"/>
+      <input type="number" value="${r.length}" step="0.1" placeholder="ft" oninput="updateRow(${r.id},'length',this.value)"/>
+      <input type="number" value="${r.width}" step="0.1" placeholder="in" oninput="updateRow(${r.id},'width',this.value)"/>
+      <input type="number" value="${r.thick}" step="0.1" placeholder="in" oninput="updateRow(${r.id},'thick',this.value)"/>
+      <div class="cft-badge" id="cft-${r.id}">${calcRowCFT(r).toFixed(4)}</div>
+      <button class="del-btn" onclick="deleteRow(${r.id})"><i class="ti ti-trash" style="font-size:14px;"></i></button>`;
+    c.appendChild(d);
+  });
+  recalcAll();
+}
+
+function updateRow(id,field,val){const r=rows.find(x=>x.id===id);if(r){r[field]=parseFloat(val)||0;recalcAll();}}
+function deleteRow(id){rows=rows.filter(r=>r.id!==id);renderRows();}
+function addRow(p=1,l=7,w=4,t=2){if(rows.length>=MAX_ROWS)return;rows.push({id:nextId++,pieces:p,length:l,width:w,thick:t,cft:0});renderRows();}
+document.getElementById('add-row-btn').addEventListener('click',()=>addRow());
+document.getElementById('rate').addEventListener('input',recalcAll);
+
+// ---- Add to bill ----
+function renderBillBanner(){
+  const banner=document.getElementById('bill-banner');
+  if(bill.length>0){
+    banner.style.display='block';
+    const grand=bill.reduce((a,g)=>a+g.totalCFT*g.rate,0);
+    document.getElementById('bill-count').textContent=bill.length+(bill.length===1?' group':' groups')+' in bill';
+    document.getElementById('bill-total-preview').textContent='₹'+Math.round(grand).toLocaleString('en-IN');
+  }else banner.style.display='none';
+}
+
+function renderBillEdit(){
+  const list=document.getElementById('bill-items'),empty=document.getElementById('bill-empty');
+  list.innerHTML='';
+  if(bill.length===0){empty.style.display='block';return;}
+  empty.style.display='none';
+  bill.forEach((g,gi)=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='border:1px solid #eee;border-radius:8px;margin-bottom:10px;overflow:hidden;';
+    const hd=document.createElement('div');
+    hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:#f5f5f5;border-bottom:1px solid #eee;';
+    hd.innerHTML=`<span style="font-size:12px;font-weight:600;">${g.species}</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:#555;">${g.totalCFT.toFixed(4)} CFT × ₹${g.rate.toLocaleString('en-IN')} = <strong>₹${Math.round(g.totalCFT*g.rate).toLocaleString('en-IN')}</strong></span><button data-gi="${gi}" class="rm-group" style="background:none;border:none;cursor:pointer;color:#ccc;"><i class="ti ti-x" style="font-size:15px;"></i></button></div>`;
+    wrap.appendChild(hd);
+    g.items.forEach((item,ii)=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;padding:5px 11px;font-size:11px;color:#555;border-bottom:1px solid #f5f5f5;';
+      row.innerHTML=`<span>Row ${ii+1}: ${item.pieces} pcs × ${item.length}ft × ${item.width}in × ${item.thick}in</span><span style="font-weight:500;">${item.cft.toFixed(4)} CFT</span>`;
+      wrap.appendChild(row);
+    });
+    list.appendChild(wrap);
+  });
+  document.querySelectorAll('.rm-group').forEach(btn=>{btn.addEventListener('click',()=>{bill.splice(parseInt(btn.dataset.gi),1);renderBillEdit();renderBillBanner();});});
+}
+
+document.getElementById('add-bill-btn').addEventListener('click',()=>{
+  if(rows.length===0)return;
+  const rate=parseFloat(document.getElementById('rate').value)||0;
+  const species=getSpecies();
+  const items=rows.map(r=>({pieces:r.pieces,length:r.length,width:r.width,thick:r.thick,cft:calcRowCFT(r)}));
+  const totalCFT=items.reduce((a,i)=>a+i.cft,0);
+  bill.push({species,rate,items,totalCFT});
+  calcHistory.unshift({species,rate,totalCFT,rows:items.length,time:new Date().toLocaleString('en-IN')});
+  renderBillBanner();renderBillEdit();
+  rows=[];nextId=1;addRow();
+});
+
+// ---- Generate invoice ----
+function renderInvoiceFromData(data) {
+  document.getElementById('inv-sname').textContent = data.shop.name || 'Your Shop Name';
+  document.getElementById('inv-saddr').textContent = data.shop.addr || '';
+  const contact = [data.shop.phone ? 'Ph: '+data.shop.phone : '', data.shop.gst ? 'GSTIN: '+data.shop.gst : ''].filter(Boolean).join('   |   ');
+  document.getElementById('inv-scontact').textContent = contact;
+  document.getElementById('inv-sgst-no').textContent = data.shop.gst || '-';
+  document.getElementById('inv-cname').textContent = data.customer.name || '-';
+  document.getElementById('inv-cphone').textContent = data.customer.phone || '-';
+  document.getElementById('inv-vehicle').textContent = data.customer.vehicle || '-';
+  document.getElementById('inv-cgst-no').textContent = data.customer.gst || '-';
+  document.getElementById('inv-date').textContent = data.date;
+  document.getElementById('inv-num').textContent = data.invNum;
+
+  const tbody = document.getElementById('inv-rows');
+  tbody.innerHTML = '';
+  let sno = 1, subtotal = 0;
+  data.bill.forEach((g, gi) => {
+    const bg = gi % 2 === 0 ? '#fff' : '#fafafa';
+    g.items.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td style="text-align:center;background:${bg};">${sno++}</td><td style="background:${bg};">${g.species}</td><td style="text-align:center;background:${bg};">${item.pieces}</td><td style="text-align:right;background:${bg};">${item.cft.toFixed(4)}</td><td style="text-align:right;background:${bg};">—</td><td style="text-align:right;background:${bg};">—</td>`;
+      tbody.appendChild(tr);
+    });
+    const groupAmt = g.totalCFT * g.rate;
+    subtotal += groupAmt;
+    const str = document.createElement('tr');
+    str.className = 'sub-row';
+    str.innerHTML = `<td colspan="3" style="text-align:right;font-style:italic;font-size:8.5px;">Total CFT (${g.species})</td><td style="text-align:right;">${g.totalCFT.toFixed(4)}</td><td style="text-align:right;">₹${g.rate.toLocaleString('en-IN')}</td><td style="text-align:right;">₹${Math.round(groupAmt).toLocaleString('en-IN')}</td>`;
+    tbody.appendChild(str);
+  });
+
+  const cp = data.gst.cgst, sp2 = data.gst.sgst, ip = data.gst.igst;
+  const ca = subtotal*cp/100, sa = subtotal*sp2/100, ia = subtotal*ip/100;
+  const grand = subtotal + ca + sa + ia;
+  document.getElementById('inv-sub').textContent = '₹'+Math.round(subtotal).toLocaleString('en-IN');
+  document.getElementById('inv-cl').textContent = 'CGST ('+cp+'%)'; document.getElementById('inv-cv').textContent = '₹'+Math.round(ca).toLocaleString('en-IN');
+  document.getElementById('inv-sl').textContent = 'SGST ('+sp2+'%)'; document.getElementById('inv-sv').textContent = '₹'+Math.round(sa).toLocaleString('en-IN');
+  document.getElementById('inv-il').textContent = 'IGST ('+ip+'%)'; document.getElementById('inv-iv').textContent = '₹'+Math.round(ia).toLocaleString('en-IN');
+  document.getElementById('inv-grand').textContent = '₹'+Math.round(grand).toLocaleString('en-IN');
+  const tb = document.getElementById('inv-terms-blk');
+  if (data.shop.terms) { document.getElementById('inv-terms-txt').textContent = data.shop.terms; tb.style.display = 'block'; } else tb.style.display = 'none';
+}
+
+document.getElementById('gen-bill-btn').addEventListener('click', async () => {
+  const invNum = 'INV-' + invCounter++;
+  const date = new Date().toLocaleDateString('en-IN');
+  const cp = parseFloat(document.getElementById('cgst-pct').value)||0;
+  const sp2 = parseFloat(document.getElementById('sgst-pct').value)||0;
+  const ip = parseFloat(document.getElementById('igst-pct').value)||0;
+  const custName = document.getElementById('cust-name').value || '-';
+  const vehicle = document.getElementById('cust-vehicle').value || '-';
+
+  const invoiceData = {
+    invNum, date,
+    shop: { ...shop },
+    customer: { name: custName, phone: document.getElementById('cust-phone').value||'-', vehicle, gst: document.getElementById('cust-gst').value||'-' },
+    bill: JSON.parse(JSON.stringify(bill)),
+    gst: { cgst: cp, sgst: sp2, igst: ip }
+  };
+
+  renderInvoiceFromData(invoiceData);
+  document.getElementById('bill-edit').style.display = 'none';
+  document.getElementById('bill-invoice').style.display = 'block';
+
+  // Save to Google Sheets
+  if (accessToken) {
+    try {
+      await saveBillToSheet(invNum, custName, vehicle, JSON.stringify(invoiceData));
+    } catch(e) { showToast('⚠️ Could not save to Sheets — check connection'); }
+  }
+
+  bill = []; renderBillBanner();
+});
+
+document.getElementById('edit-inv-btn').addEventListener('click',()=>{document.getElementById('bill-invoice').style.display='none';document.getElementById('bill-edit').style.display='block';});
+document.getElementById('print-inv-btn').addEventListener('click',()=>window.print());
+
+// ---- Calc history ----
+function renderCalcHist(){
+  const el=document.getElementById('calc-hist-list');
+  if(calcHistory.length===0){el.innerHTML='<div class="empty-msg">No calculations yet.</div>';return;}
+  el.innerHTML='';
+  calcHistory.forEach(h=>{
+    const d=document.createElement('div');d.className='hist-item';
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:13px;font-weight:500;">${h.species}</span><span class="hist-badge">Calc</span></div><div style="font-size:12px;color:#555;">${h.rows} row${h.rows!==1?'s':''} · ${h.totalCFT.toFixed(4)} CFT · ₹${h.rate.toLocaleString('en-IN')}/CFT</div><div style="font-size:13px;font-weight:600;margin-top:4px;">₹${Math.round(h.totalCFT*h.rate).toLocaleString('en-IN')}</div><div style="font-size:10px;color:#bbb;margin-top:2px;">${h.time}</div>`;
+    el.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>
