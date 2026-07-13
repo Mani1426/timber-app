@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#111111"/>
+<title>TimberCalc</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<link rel="manifest" href="manifest.json"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#e8e8e8;display:flex;justify-content:center;padding:20px;min-height:100vh;}
+input,select,textarea,button{font-family:inherit;font-size:13px;border-radius:6px;outline:none;}
+input,select,textarea{border:1px solid #ccc;padding:6px 8px;background:#fff;color:#111;width:100%;}
+textarea{resize:vertical;}
+button{border:1px solid #bbb;background:#fff;padding:7px 14px;cursor:pointer;color:#111;}
+button:hover{background:#f0f0f0;}
+.btn-primary{background:#111;color:#fff;border-color:#111;}
+.btn-primary:hover{background:#333;}
+label{font-size:10px;color:#777;display:block;margin-bottom:2px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;}
+.phone{width:390px;background:#f4f4f4;border-radius:24px;border:1px solid #bbb;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);}
+.topbar{padding:13px 16px 10px;border-bottom:1px solid #ddd;background:#fff;display:flex;justify-content:space-between;align-items:center;}
+.topbar-title{font-size:17px;font-weight:600;color:#111;}
+.screen{padding:14px 16px;display:none;overflow-y:auto;max-height:590px;min-height:480px;}
+.screen.active{display:block;}
+.card{background:#fff;border-radius:10px;border:1px solid #e0e0e0;padding:12px;margin-bottom:12px;}
+.sec-label{font-size:10px;font-weight:700;color:#888;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
+.gap-col{display:flex;flex-direction:column;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.empty-msg{text-align:center;padding:28px 0;color:#bbb;font-size:13px;}
+.bill-banner{background:#111;color:#fff;border-radius:8px;padding:9px 14px;margin-bottom:12px;cursor:pointer;display:none;font-size:12px;}
+.settings-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border-radius:10px;border:1px solid #e0e0e0;margin-bottom:8px;cursor:pointer;}
+.settings-item:hover{background:#f9f9f9;}
+.settings-item-left{display:flex;align-items:center;gap:10px;}
+.settings-item-icon{width:34px;height:34px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;color:#444;}
+.sub-screen{display:none;padding:14px 16px;min-height:480px;max-height:590px;overflow-y:auto;}
+.sub-screen.active{display:block;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#111;background:none;border:none;padding:0;margin-bottom:14px;cursor:pointer;}
+.hist-item{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:11px 13px;margin-bottom:8px;}
+.hist-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:#f0f0f0;color:#555;border:1px solid #ddd;}
+.hist-badge.bill{background:#111;color:#fff;border-color:#111;}
+.bottomnav{display:flex;border-top:1px solid #ddd;background:#fff;}
+.nav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 6px 10px;cursor:pointer;color:#aaa;font-size:10px;font-weight:500;}
+.nav-btn.active{color:#111;}
+.nav-btn i{font-size:20px;}
+.species-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.species-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;}
+.species-opt.selected{border-color:#111;background:#f9f9f9;}
+.species-opt input[type=radio]{accent-color:#111;width:14px;height:14px;cursor:pointer;}
+.species-opt label{font-size:13px;color:#111;font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer;margin:0;}
+.calc-table-wrap{background:#fff;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.calc-table-header{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 62px 26px;gap:3px;padding:6px 8px;background:#111;color:#fff;font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;align-items:center;}
+.calc-row{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 62px 26px;gap:3px;padding:5px 8px;border-top:1px solid #f0f0f0;align-items:center;}
+.calc-row input{padding:5px 4px;font-size:12px;text-align:center;border:1px solid #ddd;border-radius:5px;}
+.cft-badge{background:#f0f0f0;border-radius:5px;padding:5px 3px;font-size:10px;font-weight:600;text-align:center;color:#111;}
+.del-btn{background:none;border:none;padding:2px;cursor:pointer;color:#ccc;display:flex;align-items:center;justify-content:center;}
+.del-btn:hover{color:#e00;}
+.summary-strip{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 12px;}
+.summary-strip .lbl{font-size:10px;color:#888;text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px;}
+.summary-strip .val{font-size:13px;font-weight:600;color:#111;}
+#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:30px;}
+#login-screen.hidden{display:none;}
+.login-logo{font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;}
+.login-sub{font-size:13px;color:#888;margin-bottom:48px;}
+.google-btn{display:flex;align-items:center;gap:12px;background:#fff;color:#111;border:none;border-radius:8px;padding:14px 24px;font-size:14px;font-weight:600;cursor:pointer;width:100%;max-width:280px;justify-content:center;}
+.google-btn:hover{background:#f0f0f0;}
+.google-btn img{width:20px;height:20px;}
+.user-avatar{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;cursor:pointer;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:8px;font-size:12px;z-index:9999;display:none;white-space:nowrap;max-width:320px;text-align:center;}
+.toast.show{display:block;}
+.saving-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;}
+.saving-overlay.show{display:flex;}
+.saving-spinner{width:40px;height:40px;border:3px solid #555;border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sheets-table{width:100%;border-collapse:collapse;font-size:11px;}
+.sheets-table th{background:#111;color:#fff;padding:7px 8px;text-align:left;font-size:10px;}
+.sheets-table td{padding:7px 8px;border-bottom:1px solid #eee;vertical-align:middle;}
+.sheets-table tr:hover td{background:#f9f9f9;}
+.view-pdf-btn{font-size:11px;padding:3px 10px;background:#111;color:#fff;border:none;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;}
+/* Screen invoice */
+#invoice-paper{background:#fff;padding:16px 14px;color:#000;font-family:Arial,sans-serif;border:1px solid #ccc;font-size:8px;}
+.inv-header{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:8px;}
+.inv-shop-name{font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:Georgia,serif;}
+.inv-shop-sub{font-size:8px;color:#333;margin-top:2px;}
+.inv-label-tag{font-size:8px;font-weight:700;letter-spacing:3px;border:1px solid #000;display:inline-block;padding:2px 10px;margin:5px 0;}
+.inv-meta{width:100%;border-collapse:collapse;font-size:8px;margin-bottom:7px;}
+.inv-meta td{border:0.5px solid #000;padding:3px 5px;vertical-align:top;}
+.inv-meta .lbl{color:#555;font-size:7px;display:block;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;}
+.inv-items{width:100%;border-collapse:collapse;font-size:7.5px;table-layout:fixed;}
+.inv-items th{border:0.5px solid #000;padding:4px 4px;background:#000;color:#fff;font-weight:600;font-size:7px;letter-spacing:0.3px;text-transform:uppercase;}
+.inv-items td{border:0.5px solid #000;padding:3px 4px;}
+.inv-items .sub-row td{background:#e8e8e8;font-weight:700;}
+.inv-totals{width:48%;margin-left:52%;border-collapse:collapse;font-size:8px;margin-top:2px;}
+.inv-totals td{border:0.5px solid #000;padding:2px 6px;}
+.inv-totals .grand td{font-weight:700;background:#000;color:#fff;padding:3px 6px;}
+.inv-terms{margin-top:6px;font-size:7px;color:#444;border-top:0.5px solid #bbb;padding-top:5px;display:none;}
+.inv-sig{display:flex;justify-content:space-between;margin-top:20px;font-size:8px;color:#333;}
+.sig-blk{text-align:center;width:38%;}
+.sig-line{border-top:0.5px solid #000;padding-top:3px;margin-top:16px;}
+.inv-actions{display:flex;gap:8px;margin-top:12px;}
+@media print{
+  .no-print{display:none!important;}
+  body{background:#fff;padding:0;}
+  .phone{box-shadow:none;border:none;width:100%;border-radius:0;}
+  #invoice-paper{border:none;}
+  .bottomnav,.topbar,#login-screen,.toast,.saving-overlay{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">🪵 TimberCalc</div>
+  <div class="login-sub">GST Invoice & CFT Calculator</div>
+  <button class="google-btn" id="google-login-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+    Sign in with Google
+  </button>
+  <div style="font-size:11px;color:#555;margin-top:20px;">Bills auto-save to Google Drive & Sheets</div>
+</div>
+
+<div class="saving-overlay" id="saving-overlay">
+  <div class="saving-spinner"></div>
+  <div id="saving-msg" style="font-size:14px;font-weight:500;">Generating PDF...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="phone" id="main-app" style="display:none;">
+  <div class="topbar no-print">
+    <div class="topbar-title" id="topbar-title">Calculator</div>
+    <img class="user-avatar" id="user-avatar" src="" alt="" title="Sign out"/>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div class="screen active" id="screen-calc">
+    <div class="bill-banner" id="bill-banner">
+      <div style="display:flex;justify-content:space-between;"><span id="bill-count">0 groups in bill</span><span id="bill-total-preview">₹0</span></div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Tap to open bill →</div>
+    </div>
+    <div class="sec-label">Wood species</div>
+    <div class="species-group">
+      <div class="species-opt selected" data-val="Indian Teak"><input type="radio" name="species" id="sp1" value="Indian Teak" checked/><label for="sp1">Indian Teak</label></div>
+      <div class="species-opt" data-val="African Teak"><input type="radio" name="species" id="sp2" value="African Teak"/><label for="sp2">African Teak</label></div>
+      <div class="species-opt" data-val="other"><input type="radio" name="species" id="sp3" value="other"/><label for="sp3">Other</label><input type="text" id="sp-other-text" placeholder="Species name" style="display:none;flex:1;margin-left:6px;padding:4px 7px;font-size:12px;"/></div>
+    </div>
+    <div class="calc-table-wrap">
+      <div class="calc-table-header"><span>#</span><span>Pcs</span><span>L(ft)</span><span>W(in)</span><span>T(in)</span><span>CFT</span><span></span></div>
+      <div id="calc-rows"></div>
+    </div>
+    <button id="add-row-btn" style="width:100%;padding:7px;font-size:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-plus" style="font-size:14px;"></i> Add row (max 8)</button>
+    <div class="summary-strip">
+      <div style="flex:1;"><div class="lbl">Total CFT</div><div class="val" id="total-cft">0.0000</div></div>
+      <div style="color:#ccc;font-size:18px;">×</div>
+      <div style="flex:1;margin:0 8px;"><div class="lbl">Price/CFT (₹)</div><input type="number" id="rate" value="4000" step="50" style="padding:5px 8px;font-size:13px;font-weight:600;"/></div>
+      <div style="text-align:right;"><div class="lbl">Total cost</div><div class="val" id="total-cost" style="font-size:15px;">₹0</div></div>
+    </div>
+    <button class="btn-primary" id="add-bill-btn" style="width:100%;padding:10px;font-size:13px;font-weight:600;">+ Add to bill</button>
+  </div>
+
+  <!-- BILL -->
+  <div class="screen" id="screen-bill">
+    <div id="bill-edit">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+        <div><div id="shop-sum-name" style="font-size:13px;font-weight:600;">No enterprise details</div><div id="shop-sum-sub" style="font-size:11px;color:#aaa;">Set up in Settings</div></div>
+        <button id="go-settings-btn" style="font-size:11px;padding:5px 10px;"><i class="ti ti-settings" style="font-size:13px;vertical-align:-2px;"></i> Edit</button>
+      </div>
+      <div class="sec-label">Customer details</div>
+      <div class="card gap-col" style="margin-bottom:12px;">
+        <div><label>Customer name</label><input type="text" id="cust-name" placeholder="Ramesh Kumar"/></div>
+        <div><label>Phone number</label><input type="text" id="cust-phone" placeholder="98xxxxxxxx"/></div>
+        <div><label>Vehicle number</label><input type="text" id="cust-vehicle" placeholder="TN 01 AB 1234"/></div>
+        <div><label>Customer address</label><input type="text" id="cust-addr" placeholder="Door no, street, city"/></div>
+        <div><label>Customer GSTIN (optional)</label><input type="text" id="cust-gst" placeholder="29ABCDE..."/></div>
+      </div>
+      <div style="margin-bottom:8px;"><span class="sec-label" style="margin:0;">Bill items</span></div>
+      <div id="bill-items"></div>
+      <div class="empty-msg" id="bill-empty">No items yet. Add from Calculator.</div>
+      <div class="card" style="margin-top:12px;">
+        <div class="sec-label">GST rates</div>
+        <div class="row3">
+          <div><label>CGST %</label><input type="number" id="cgst-pct" value="0" step="0.5"/></div>
+          <div><label>SGST %</label><input type="number" id="sgst-pct" value="0" step="0.5"/></div>
+          <div><label>IGST %</label><input type="number" id="igst-pct" value="0" step="0.5"/></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="gen-bill-btn" style="width:100%;padding:10px;font-size:13px;font-weight:600;margin-top:12px;">Generate &amp; Save Bill</button>
+    </div>
+    <div id="bill-invoice" style="display:none;">
+      <div id="invoice-paper">
+        <div class="inv-header">
+          <div class="inv-shop-name" id="inv-sname"></div>
+          <div class="inv-shop-sub" id="inv-saddr"></div>
+          <div class="inv-shop-sub" id="inv-scontact"></div>
+        </div>
+        <div style="text-align:center;"><span class="inv-label-tag">TAX INVOICE</span></div>
+        <table class="inv-meta">
+          <tr><td style="width:50%;"><span class="lbl">Bill to</span><strong id="inv-cname"></strong></td><td><span class="lbl">Invoice no.</span><strong id="inv-num"></strong></td></tr>
+          <tr><td><span class="lbl">Address</span><span id="inv-caddr"></span></td><td><span class="lbl">Date &amp; Time</span><span id="inv-date"></span></td></tr>
+          <tr><td><span class="lbl">Phone</span><span id="inv-cphone"></span></td><td><span class="lbl">Supplier GSTIN</span><span id="inv-sgst-no"></span></td></tr>
+          <tr><td><span class="lbl">Vehicle no.</span><span id="inv-vehicle"></span></td><td><span class="lbl">Contact person</span><span id="inv-contact-person"></span></td></tr>
+          <tr><td><span class="lbl">Customer GSTIN</span><span id="inv-cgst-no"></span></td><td></td></tr>
+        </table>
+        <table class="inv-items">
+          <thead><tr><th style="width:7%;text-align:center;">S.No</th><th style="text-align:left;">Particulars</th><th style="width:10%;text-align:center;">Pcs</th><th style="width:15%;text-align:right;">CFT</th><th style="width:15%;text-align:right;">Rate/CFT</th><th style="width:18%;text-align:right;">Amount (₹)</th></tr></thead>
+          <tbody id="inv-rows"></tbody>
+        </table>
+        <table class="inv-totals">
+          <tr><td style="color:#555;">Subtotal</td><td style="text-align:right;" id="inv-sub"></td></tr>
+          <tr><td style="color:#555;" id="inv-cl">CGST (0%)</td><td style="text-align:right;" id="inv-cv"></td></tr>
+          <tr><td style="color:#555;" id="inv-sl">SGST (0%)</td><td style="text-align:right;" id="inv-sv"></td></tr>
+          <tr><td style="color:#555;" id="inv-il">IGST (0%)</td><td style="text-align:right;" id="inv-iv"></td></tr>
+          <tr class="grand"><td>Grand Total</td><td style="text-align:right;" id="inv-grand"></td></tr>
+        </table>
+        <div style="border:0.5px solid #000;padding:3px 6px;margin-top:4px;font-size:7.5px;"><span style="color:#555;text-transform:uppercase;font-size:7px;letter-spacing:0.3px;">Rupees in words: </span><strong id="inv-rupees-words"></strong></div>
+        <div class="inv-terms" id="inv-terms-blk"><strong>Terms &amp; Conditions:</strong> <span id="inv-terms-txt"></span></div>
+        <div class="inv-sig">
+          <div class="sig-blk"><div class="sig-line">Customer signature</div></div>
+          <div class="sig-blk"><div class="sig-line">Authorized signature</div></div>
+        </div>
+      </div>
+      <div class="inv-actions no-print">
+        <button id="edit-inv-btn" style="flex:1;padding:10px;font-weight:500;">Edit</button>
+        <button class="btn-primary" id="print-inv-btn" style="flex:1;padding:10px;font-weight:600;"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;"></i> Print / PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="screen-settings">
+    <div class="settings-item" id="s-enterprise"><div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-building-store"></i></div><div><div style="font-size:13px;font-weight:500;">Enterprise details</div><div style="font-size:11px;color:#aaa;">Shop name, GSTIN, address</div></div></div><i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i></div>
+    <div class="settings-item" id="s-billhist"><div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-table"></i></div><div><div style="font-size:13px;font-weight:500;">Bill history</div><div style="font-size:11px;color:#aaa;">Saved in Google Sheets + Drive</div></div></div><i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i></div>
+    <div class="settings-item" id="s-calchist"><div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-calculator"></i></div><div><div style="font-size:13px;font-weight:500;">Calculation history</div><div style="font-size:11px;color:#aaa;">View past CFT calculations</div></div></div><i class="ti ti-chevron-right" style="color:#ccc;font-size:16px;"></i></div>
+    <div class="settings-item" id="s-signout"><div class="settings-item-left"><div class="settings-item-icon"><i class="ti ti-logout"></i></div><div><div style="font-size:13px;font-weight:500;">Sign out</div><div style="font-size:11px;color:#aaa;" id="signed-in-as">—</div></div></div></div>
+  </div>
+
+  <!-- SUB: ENTERPRISE -->
+  <div class="sub-screen" id="sub-enterprise">
+    <button class="back-btn" id="back-from-ent"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Enterprise details</div>
+    <div class="card gap-col">
+      <div><label>Shop or enterprise name</label><input type="text" id="set-name"/></div>
+      <div><label>GSTIN</label><input type="text" id="set-gst"/></div>
+      <div><label>Address</label><input type="text" id="set-addr"/></div>
+      <div><label>Contact person name</label><input type="text" id="set-contact" placeholder="e.g. Suresh Kumar"/></div>
+      <div><label>Phone number</label><input type="text" id="set-phone"/></div>
+      <div><label>Terms and conditions</label><textarea id="set-terms" rows="3" placeholder="e.g. Goods once sold will not be taken back."></textarea></div>
+    </div>
+    <button class="btn-primary" id="save-ent-btn" style="width:100%;padding:10px;font-weight:600;">Save details</button>
+    <div id="ent-saved" style="text-align:center;font-size:12px;color:green;margin-top:8px;display:none;">Saved successfully.</div>
+  </div>
+
+  <!-- SUB: BILL HISTORY -->
+  <div class="sub-screen" id="sub-billhist">
+    <button class="back-btn" id="back-from-bh"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Bill history</div>
+    <div id="bill-hist-list"><div class="empty-msg">Loading...</div></div>
+  </div>
+
+  <!-- SUB: CALC HISTORY -->
+  <div class="sub-screen" id="sub-calchist">
+    <button class="back-btn" id="back-from-ch"><i class="ti ti-arrow-left" style="font-size:16px;"></i> Settings</button>
+    <div class="sec-label">Calculation history</div>
+    <div id="calc-hist-list"><div class="empty-msg">No calculations yet.</div></div>
+  </div>
+
+  <div class="bottomnav no-print">
+    <button class="nav-btn active" data-screen="calc" data-title="Calculator"><i class="ti ti-calculator"></i><span>Calculate</span></button>
+    <button class="nav-btn" data-screen="bill" data-title="Bill"><i class="ti ti-receipt"></i><span>Bill</span></button>
+    <button class="nav-btn" data-screen="settings" data-title="Settings"><i class="ti ti-settings"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+const CLIENT_ID='1061996485750-p44qfe053lqu9bs3s4i4kvpnaub7dknn.apps.googleusercontent.com';
+const SHEET_ID='13MfMoqBZhYx1wcufzv0Cqu7ZVioVt_yL6wVhALkEakY';
+const SCOPES='https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+
+let tokenClient,accessToken=null,currentUser=null;
+let invCounter=1001,bill=[],calcHistory=[],rows=[],nextId=1;
+const MAX_ROWS=8;
+let shop={name:'',gst:'',addr:'',contact:'',phone:'',terms:''};
+
+// ---- Auth ----
+window.addEventListener('load',()=>{
+  const saved=sessionStorage.getItem('timber_token');
+  const savedUser=sessionStorage.getItem('timber_user');
+  if(saved&&savedUser){accessToken=saved;currentUser=JSON.parse(savedUser);showApp();}
+  google.accounts.id.initialize({client_id:CLIENT_ID,callback:handleCredentialResponse});
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:(resp)=>{
+    if(resp.error){showToast('Auth error: '+resp.error);return;}
+    accessToken=resp.access_token;
+    sessionStorage.setItem('timber_token',accessToken);
+    showApp();
+  }});
+  document.getElementById('google-login-btn').addEventListener('click',()=>{
+    google.accounts.id.prompt(n=>{if(n.isNotDisplayed()||n.isSkippedMoment())tokenClient.requestAccessToken({prompt:'consent'});});
+  });
+});
+
+function handleCredentialResponse(response){
+  const payload=JSON.parse(atob(response.credential.split('.')[1]));
+  currentUser={name:payload.name,email:payload.email,picture:payload.picture};
+  sessionStorage.setItem('timber_user',JSON.stringify(currentUser));
+  tokenClient.requestAccessToken({prompt:''});
+}
+
+function showApp(){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('main-app').style.display='block';
+  if(currentUser){document.getElementById('user-avatar').src=currentUser.picture||'';document.getElementById('signed-in-as').textContent='Signed in as '+(currentUser.email||'');}
+  const s=localStorage.getItem('timber_shop');if(s){shop=JSON.parse(s);refreshShopCard();}
+  ensureSheetHeaders();
+  addRow();
+}
+document.getElementById('user-avatar').addEventListener('click',()=>{if(confirm('Sign out?')){sessionStorage.clear();location.reload();}});
+document.getElementById('s-signout').addEventListener('click',()=>{if(confirm('Sign out?')){sessionStorage.clear();location.reload();}});
+
+// ---- API helpers ----
+async function apiReq(url,method='GET',body=null){
+  const h={'Authorization':'Bearer '+accessToken};
+  if(body)h['Content-Type']='application/json';
+  const r=await fetch(url,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  return r.json();
+}
+
+async function ensureSheetHeaders(){
+  try{
+    const d=await apiReq(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A1:E1`);
+    if(!d.values||d.values[0][0]!=='Date'){
+      await apiReq(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A1:E1?valueInputOption=RAW`,'PUT',{values:[['Date','Invoice No','Customer Name','Vehicle No','View PDF']]});
+    }
+  }catch(e){}
+}
+
+// ---- Pure jsPDF invoice — no blurriness ----
+function buildPDF(inv){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const PW=210,PH=297,ML=14,MR=14,MT=14;
+  const CW=PW-ML-MR; // content width = 182mm
+  let y=MT;
+
+  // helpers
+  const line=(x1,y1,x2,y2,lw=0.2)=>{doc.setLineWidth(lw);doc.line(x1,y1,x2,y2);};
+  const rect=(x,yr,w,h,fill)=>{if(fill){doc.setFillColor(...fill);doc.rect(x,yr,w,h,'F');}else{doc.setLineWidth(0.2);doc.rect(x,yr,w,h,'S');}};
+  const txt=(text,x,yr,size=9,bold=false,align='left',color=[0,0,0])=>{
+    doc.setFontSize(size);doc.setFont('helvetica',bold?'bold':'normal');doc.setTextColor(...color);
+    doc.text(String(text),x,yr,{align});
+  };
+
+  // Header
+  txt(inv.shop.name||'YOUR SHOP NAME',PW/2,y+7,16,true,'center');
+  y+=10;
+  txt(inv.shop.addr||'',PW/2,y+4,8,false,'center',[80,80,80]);y+=5;
+  if(inv.shop.contact){txt(inv.shop.contact,PW/2,y+4,8,false,'center',[80,80,80]);y+=5;}
+  const contact=[inv.shop.phone?'Ph: '+inv.shop.phone:'',inv.shop.gst?'GSTIN: '+inv.shop.gst:''].filter(Boolean).join('   |   ');
+  txt(contact,PW/2,y+4,8,false,'center',[80,80,80]);y+=6;
+  doc.setLineWidth(0.5);doc.setDrawColor(0,0,0);line(ML,y,PW-MR,y,0.5);y+=4;
+
+  // TAX INVOICE label
+  txt('TAX INVOICE',PW/2,y+4,9,true,'center');
+  doc.setLineWidth(0.3);doc.rect(PW/2-18,y-1,36,6,'S');
+  y+=10;
+
+  // Meta table — 2 columns
+  const mh=6,mc=CW/2;
+  const metaRows=[
+    [{label:'BILL TO',val:inv.customer.name||'-'},{label:'INVOICE NO.',val:inv.invNum}],
+    [{label:'ADDRESS',val:inv.customer.addr||'-'},{label:'DATE & TIME',val:inv.date}],
+    [{label:'PHONE',val:inv.customer.phone||'-'},{label:'CONTACT PERSON',val:inv.shop.contact||'-'}],
+    [{label:'VEHICLE NO.',val:inv.customer.vehicle||'-'},{label:'SUPPLIER GSTIN',val:inv.shop.gst||'-'}],
+    [{label:'CUSTOMER GSTIN',val:inv.customer.gst||'-'},{label:'',val:''}]
+  ];
+  metaRows.forEach(row=>{
+    doc.setLineWidth(0.2);doc.setDrawColor(0,0,0);
+    doc.rect(ML,y,mc,mh,'S');doc.rect(ML+mc,y,mc,mh,'S');
+    row.forEach((cell,ci)=>{
+      const cx=ML+ci*mc;
+      txt(cell.label,cx+2,y+2.5,6,false,'left',[100,100,100]);
+      txt(cell.val,cx+2,y+5,8,true,'left',[0,0,0]);
+    });
+    y+=mh;
+  });
+  y+=3;
+
+  // Items table columns: S.No(10) | Particulars(65) | Pcs(15) | CFT(22) | Rate/CFT(30) | Amount(40)
+  const cols=[10,65,15,22,30,40];
+  const colX=[ML];cols.forEach((w,i)=>{if(i<cols.length-1)colX.push(colX[i]+cols[i]);});
+  const headers=['S.No','Particulars','Pcs','CFT','Rate/CFT','Amount (Rs)'];
+  const aligns=['center','left','center','right','right','right'];
+
+  // Header row
+  const hRowH=7;
+  rect(ML,y,CW,hRowH,[0,0,0]);
+  headers.forEach((h,i)=>{
+    const ax=aligns[i]==='center'?colX[i]+cols[i]/2:aligns[i]==='right'?colX[i]+cols[i]-2:colX[i]+2;
+    txt(h,ax,y+4.5,7,true,aligns[i],[255,255,255]);
+    if(i<cols.length-1)line(colX[i+1],y,colX[i+1],y+hRowH,0.15);
+  });
+  y+=hRowH;
+
+  // Item rows
+  let sno=1,subtotal=0;
+  inv.bill.forEach((g,gi)=>{
+    const rowBg=gi%2===0?[255,255,255]:[248,248,248];
+    g.items.forEach(item=>{
+      const rh=6;
+      rect(ML,y,CW,rh,rowBg);
+      doc.setLineWidth(0.15);doc.setDrawColor(180,180,180);doc.rect(ML,y,CW,rh,'S');
+      const cells=[sno++,g.species,item.pieces,item.cft.toFixed(4),'—','—'];
+      cells.forEach((c,i)=>{
+        const ax=aligns[i]==='center'?colX[i]+cols[i]/2:aligns[i]==='right'?colX[i]+cols[i]-2:colX[i]+2;
+        txt(c,ax,y+4,8,false,aligns[i]);
+        if(i<cols.length-1){doc.setLineWidth(0.15);line(colX[i+1],y,colX[i+1],y+rh,0.15);}
+      });
+      y+=rh;
+    });
+
+    // Group subtotal row
+    const groupAmt=g.totalCFT*g.rate;subtotal+=groupAmt;
+    const srh=6;
+    rect(ML,y,CW,srh,[220,220,220]);
+    doc.setLineWidth(0.3);doc.setDrawColor(0,0,0);doc.rect(ML,y,CW,srh,'S');
+    txt('Total CFT ('+g.species+')',colX[0]+cols[0]+cols[1]-2,y+4,7.5,true,'right');
+    txt(g.totalCFT.toFixed(4),colX[3]+cols[3]-2,y+4,7.5,true,'right');
+    txt('Rs '+g.rate.toLocaleString('en-IN'),colX[4]+cols[4]-2,y+4,7.5,true,'right');
+    txt('Rs '+Math.round(groupAmt).toLocaleString('en-IN'),colX[5]+cols[5]-2,y+4,7.5,true,'right');
+    [1,2,3,4,5].forEach(i=>{doc.setLineWidth(0.15);line(colX[i],y,colX[i],y+srh,0.15);});
+    y+=srh;
+  });
+  y+=4;
+
+  // Totals table — right half
+  const tw=80,tx=PW-MR-tw;
+  const cp=inv.gst.cgst,sp=inv.gst.sgst,ip=inv.gst.igst;
+  const ca=subtotal*cp/100,sa=subtotal*sp/100,ia=subtotal*ip/100,grand=subtotal+ca+sa+ia;
+  const totRows=[
+    ['Subtotal','Rs '+Math.round(subtotal).toLocaleString('en-IN'),false],
+    ['CGST ('+cp+'%)','Rs '+Math.round(ca).toLocaleString('en-IN'),false],
+    ['SGST ('+sp+'%)','Rs '+Math.round(sa).toLocaleString('en-IN'),false],
+    ['IGST ('+ip+'%)','Rs '+Math.round(ia).toLocaleString('en-IN'),false],
+    ['GRAND TOTAL','Rs '+Math.round(grand).toLocaleString('en-IN'),true]
+  ];
+  const trh=6.5;
+  totRows.forEach(([label,val,bold])=>{
+    if(bold){rect(tx,y,tw,trh,[0,0,0]);doc.setDrawColor(0,0,0);doc.rect(tx,y,tw,trh,'S');txt(label,tx+3,y+4.5,8,true,'left',[255,255,255]);txt(val,tx+tw-3,y+4.5,8,true,'right',[255,255,255]);}
+    else{doc.setDrawColor(0,0,0);doc.rect(tx,y,tw,trh,'S');txt(label,tx+3,y+4.5,8,false,'left',[80,80,80]);txt(val,tx+tw-3,y+4.5,8,false,'right');}
+    line(tx+tw/2,y,tx+tw/2,y+trh,0.2);
+    y+=trh;
+  });
+  y+=4;
+
+  // Rupees in words
+  doc.setDrawColor(0,0,0);doc.setLineWidth(0.2);doc.rect(ML,y,CW,7,'S');
+  txt('Rupees in Words:',ML+2,y+2.8,7,false,'left',[100,100,100]);
+  txt(numToWords(Math.round(subtotal+subtotal*cp/100+subtotal*sp/100+subtotal*ip/100)),ML+32,y+2.8,7,true,'left',[0,0,0]);
+  y+=9;
+
+  // Terms
+  if(inv.shop.terms){
+    doc.setLineWidth(0.1);line(ML,y,PW-MR,y,0.1);y+=3;
+    txt('Terms & Conditions: '+inv.shop.terms,ML,y+3,7,false,'left',[80,80,80]);
+    y+=6;
+  }
+
+  // Signatures
+  y=Math.max(y,PH-35);
+  line(ML,y,ML+50,y,0.3);line(PW-MR-50,y,PW-MR,y,0.3);
+  txt('Customer Signature',ML+25,y+4,8,false,'center',[80,80,80]);
+  txt('Authorized Signature',PW-MR-25,y+4,8,false,'center',[80,80,80]);
+
+  return doc;
+}
+
+async function uploadPDFToDrive(pdfBlob,filename){
+  const boundary='-------TimberApp314159265';
+  const delimiter='\r\n--'+boundary+'\r\n';
+  const close='\r\n--'+boundary+'--';
+  const meta=JSON.stringify({name:filename,mimeType:'application/pdf'});
+  const enc=new TextEncoder();
+  const metaPart=enc.encode(delimiter+'Content-Type: application/json\r\n\r\n'+meta+delimiter+'Content-Type: application/pdf\r\n\r\n');
+  const closePart=enc.encode(close);
+  const pdfArr=await pdfBlob.arrayBuffer();
+  const combined=new Uint8Array(metaPart.length+pdfArr.byteLength+closePart.length);
+  combined.set(metaPart,0);combined.set(new Uint8Array(pdfArr),metaPart.length);combined.set(closePart,metaPart.length+pdfArr.byteLength);
+  const uploadRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'multipart/related; boundary='+boundary},body:combined});
+  const fileData=await uploadRes.json();
+  if(!fileData.id)throw new Error('Upload failed: '+JSON.stringify(fileData));
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`,{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({role:'reader',type:'anyone'})});
+  return `https://drive.google.com/file/d/${fileData.id}/view`;
+}
+
+async function saveToSheet(invNum,custName,vehicle,driveLink,dateTime){
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({values:[[dateTime,invNum,custName,vehicle,driveLink]]})});
+}
+
+async function loadBillHistory(){
+  const el=document.getElementById('bill-hist-list');
+  el.innerHTML='<div class="empty-msg">Loading...</div>';
+  try{
+    const d=await apiReq(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A2:E`);
+    if(!d.values||d.values.length===0){el.innerHTML='<div class="empty-msg">No bills saved yet.</div>';return;}
+    let html='<table class="sheets-table"><thead><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Vehicle</th><th></th></tr></thead><tbody>';
+    [...d.values].reverse().forEach(row=>{
+      const link=row[4]||'';
+      html+=`<tr><td>${row[0]||''}</td><td style="font-weight:600;">${row[1]||''}</td><td>${row[2]||''}</td><td>${row[3]||''}</td><td>${link?`<a class="view-pdf-btn" href="${link}" target="_blank">📄 PDF</a>`:'—'}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty-msg">Error loading. Check connection.</div>';}
+}
+
+// ---- Toast & Overlay ----
+function showToast(msg,dur=3500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function showOverlay(msg){document.getElementById('saving-msg').textContent=msg;document.getElementById('saving-overlay').classList.add('show');}
+function hideOverlay(){document.getElementById('saving-overlay').classList.remove('show');}
+
+// ---- Nav ----
+const navBtns=document.querySelectorAll('.nav-btn');
+const mainScreens={calc:document.getElementById('screen-calc'),bill:document.getElementById('screen-bill'),settings:document.getElementById('screen-settings')};
+const subScreens={enterprise:document.getElementById('sub-enterprise'),billhist:document.getElementById('sub-billhist'),calchist:document.getElementById('sub-calchist')};
+const topbarTitle=document.getElementById('topbar-title');
+function hideAll(){Object.values(mainScreens).forEach(s=>{s.classList.remove('active');s.style.display='none';});Object.values(subScreens).forEach(s=>{s.classList.remove('active');s.style.display='none';});}
+function goMain(k,t){hideAll();mainScreens[k].style.display='block';mainScreens[k].classList.add('active');topbarTitle.textContent=t;navBtns.forEach(b=>b.classList.toggle('active',b.dataset.screen===k));}
+function goSub(k,t){hideAll();subScreens[k].style.display='block';subScreens[k].classList.add('active');topbarTitle.textContent=t;navBtns.forEach(b=>b.classList.remove('active'));}
+navBtns.forEach(btn=>btn.addEventListener('click',()=>goMain(btn.dataset.screen,btn.dataset.title)));
+document.getElementById('s-enterprise').addEventListener('click',()=>{loadEntFields();goSub('enterprise','Enterprise details');});
+document.getElementById('s-billhist').addEventListener('click',()=>{loadBillHistory();goSub('billhist','Bill history');});
+document.getElementById('s-calchist').addEventListener('click',()=>{renderCalcHist();goSub('calchist','Calculation history');});
+document.getElementById('back-from-ent').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('back-from-bh').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('back-from-ch').addEventListener('click',()=>goMain('settings','Settings'));
+document.getElementById('bill-banner').addEventListener('click',()=>goMain('bill','Bill'));
+document.getElementById('go-settings-btn').addEventListener('click',()=>{loadEntFields();goSub('enterprise','Enterprise details');});
+
+// ---- Shop ----
+function loadEntFields(){document.getElementById('set-name').value=shop.name;document.getElementById('set-gst').value=shop.gst;document.getElementById('set-addr').value=shop.addr;document.getElementById('set-contact').value=shop.contact||'';document.getElementById('set-phone').value=shop.phone;document.getElementById('set-terms').value=shop.terms;}
+document.getElementById('save-ent-btn').addEventListener('click',()=>{shop={name:document.getElementById('set-name').value.trim(),gst:document.getElementById('set-gst').value.trim(),addr:document.getElementById('set-addr').value.trim(),contact:document.getElementById('set-contact').value.trim(),phone:document.getElementById('set-phone').value.trim(),terms:document.getElementById('set-terms').value.trim()};localStorage.setItem('timber_shop',JSON.stringify(shop));refreshShopCard();const m=document.getElementById('ent-saved');m.style.display='block';setTimeout(()=>m.style.display='none',2000);});
+function refreshShopCard(){const n=document.getElementById('shop-sum-name'),s=document.getElementById('shop-sum-sub');if(shop.name){n.textContent=shop.name;s.textContent=(shop.phone||'No phone')+(shop.gst?' · '+shop.gst:'');}else{n.textContent='No enterprise details';s.textContent='Set up in Settings';}}
+
+// ---- Species ----
+document.querySelectorAll('.species-opt').forEach(opt=>{opt.addEventListener('click',()=>{document.querySelectorAll('.species-opt').forEach(o=>o.classList.remove('selected'));opt.classList.add('selected');opt.querySelector('input[type=radio]').checked=true;document.getElementById('sp-other-text').style.display=opt.dataset.val==='other'?'block':'none';});});
+function getSpecies(){const sel=document.querySelector('input[name=species]:checked');if(!sel)return'Indian Teak';if(sel.value==='other'){const t=document.getElementById('sp-other-text').value.trim();return t||'Other wood';}return sel.value;}
+
+// ---- Calc rows ----
+function calcRowCFT(r){return((parseFloat(r.pieces)||0)*(parseFloat(r.length)||0)*(parseFloat(r.width)||0)*(parseFloat(r.thick)||0))/144;}
+function recalcAll(){let total=0;rows.forEach(r=>{r.cft=calcRowCFT(r);total+=r.cft;const b=document.getElementById('cft-'+r.id);if(b)b.textContent=r.cft.toFixed(4);});const rate=parseFloat(document.getElementById('rate').value)||0;document.getElementById('total-cft').textContent=total.toFixed(4)+' CFT';document.getElementById('total-cost').textContent='₹'+Math.round(total*rate).toLocaleString('en-IN');const btn=document.getElementById('add-row-btn');btn.textContent=rows.length>=MAX_ROWS?'Max 8 rows reached':'+ Add row ('+rows.length+'/8)';btn.disabled=rows.length>=MAX_ROWS;}
+function renderRows(){const c=document.getElementById('calc-rows');c.innerHTML='';rows.forEach((r,i)=>{const d=document.createElement('div');d.className='calc-row';d.innerHTML=`<span style="font-size:11px;font-weight:600;color:#888;text-align:center;">${i+1}</span><input type="number" value="${r.pieces}" min="1" placeholder="Pcs" oninput="updateRow(${r.id},'pieces',this.value)"/><input type="number" value="${r.length}" step="0.1" placeholder="ft" oninput="updateRow(${r.id},'length',this.value)"/><input type="number" value="${r.width}" step="0.1" placeholder="in" oninput="updateRow(${r.id},'width',this.value)"/><input type="number" value="${r.thick}" step="0.1" placeholder="in" oninput="updateRow(${r.id},'thick',this.value)"/><div class="cft-badge" id="cft-${r.id}">${calcRowCFT(r).toFixed(4)}</div><button class="del-btn" onclick="deleteRow(${r.id})"><i class="ti ti-trash" style="font-size:14px;"></i></button>`;c.appendChild(d);});recalcAll();}
+function updateRow(id,field,val){const r=rows.find(x=>x.id===id);if(r){r[field]=parseFloat(val)||0;recalcAll();}}
+function deleteRow(id){rows=rows.filter(r=>r.id!==id);renderRows();}
+function addRow(p=1,l=7,w=4,t=2){if(rows.length>=MAX_ROWS)return;rows.push({id:nextId++,pieces:p,length:l,width:w,thick:t,cft:0});renderRows();}
+document.getElementById('add-row-btn').addEventListener('click',()=>addRow());
+document.getElementById('rate').addEventListener('input',recalcAll);
+
+// ---- Bill ----
+function renderBillBanner(){const banner=document.getElementById('bill-banner');if(bill.length>0){banner.style.display='block';const grand=bill.reduce((a,g)=>a+g.totalCFT*g.rate,0);document.getElementById('bill-count').textContent=bill.length+(bill.length===1?' group':' groups')+' in bill';document.getElementById('bill-total-preview').textContent='₹'+Math.round(grand).toLocaleString('en-IN');}else banner.style.display='none';}
+function renderBillEdit(){const list=document.getElementById('bill-items'),empty=document.getElementById('bill-empty');list.innerHTML='';if(bill.length===0){empty.style.display='block';return;}empty.style.display='none';bill.forEach((g,gi)=>{const wrap=document.createElement('div');wrap.style.cssText='border:1px solid #eee;border-radius:8px;margin-bottom:10px;overflow:hidden;';const hd=document.createElement('div');hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:#f5f5f5;border-bottom:1px solid #eee;';hd.innerHTML=`<span style="font-size:12px;font-weight:600;">${g.species}</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:#555;">${g.totalCFT.toFixed(4)} CFT × ₹${g.rate.toLocaleString('en-IN')} = <strong>₹${Math.round(g.totalCFT*g.rate).toLocaleString('en-IN')}</strong></span><button data-gi="${gi}" class="rm-group" style="background:none;border:none;cursor:pointer;color:#ccc;"><i class="ti ti-x" style="font-size:15px;"></i></button></div>`;wrap.appendChild(hd);g.items.forEach((item,ii)=>{const row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;padding:5px 11px;font-size:11px;color:#555;border-bottom:1px solid #f5f5f5;';row.innerHTML=`<span>Row ${ii+1}: ${item.pieces} pcs × ${item.length}ft × ${item.width}in × ${item.thick}in</span><span style="font-weight:500;">${item.cft.toFixed(4)} CFT</span>`;wrap.appendChild(row);});list.appendChild(wrap);});document.querySelectorAll('.rm-group').forEach(btn=>{btn.addEventListener('click',()=>{bill.splice(parseInt(btn.dataset.gi),1);renderBillEdit();renderBillBanner();});});}
+document.getElementById('add-bill-btn').addEventListener('click',()=>{if(rows.length===0)return;const rate=parseFloat(document.getElementById('rate').value)||0;const species=getSpecies();const items=rows.map(r=>({pieces:r.pieces,length:r.length,width:r.width,thick:r.thick,cft:calcRowCFT(r)}));const totalCFT=items.reduce((a,i)=>a+i.cft,0);bill.push({species,rate,items,totalCFT});calcHistory.unshift({species,rate,totalCFT,rows:items.length,time:new Date().toLocaleString('en-IN')});renderBillBanner();renderBillEdit();rows=[];nextId=1;addRow();});
+
+// ---- Rupees in words ----
+function numToWords(n){
+  const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  if(n===0)return'Zero';
+  function words(num){
+    if(num<20)return a[num];
+    if(num<100)return b[Math.floor(num/10)]+(num%10?' '+a[num%10]:'');
+    if(num<1000)return a[Math.floor(num/100)]+' Hundred'+(num%100?' '+words(num%100):'');
+    if(num<100000)return words(Math.floor(num/1000))+' Thousand'+(num%1000?' '+words(num%1000):'');
+    if(num<10000000)return words(Math.floor(num/100000))+' Lakh'+(num%100000?' '+words(num%100000):'');
+    return words(Math.floor(num/10000000))+' Crore'+(num%10000000?' '+words(num%10000000):'');
+  }
+  const rupees=Math.floor(n),paise=Math.round((n-rupees)*100);
+  let result=words(rupees)+' Rupees';
+  if(paise>0)result+=' and '+words(paise)+' Paise';
+  return result+' Only';
+}
+
+// ---- Screen invoice render ----
+function renderScreenInvoice(inv){
+  document.getElementById('inv-sname').textContent=inv.shop.name||'Your Shop Name';
+  document.getElementById('inv-saddr').textContent=inv.shop.addr||'';
+  const contact=[inv.shop.contact?inv.shop.contact:'',inv.shop.phone?'Ph: '+inv.shop.phone:'',inv.shop.gst?'GSTIN: '+inv.shop.gst:''].filter(Boolean).join('   |   ');
+  document.getElementById('inv-scontact').textContent=contact;
+  document.getElementById('inv-sgst-no').textContent=inv.shop.gst||'-';
+  document.getElementById('inv-contact-person').textContent=inv.shop.contact||'-';
+  document.getElementById('inv-cname').textContent=inv.customer.name||'-';
+  document.getElementById('inv-cphone').textContent=inv.customer.phone||'-';
+  document.getElementById('inv-caddr').textContent=inv.customer.addr||'-';
+  document.getElementById('inv-vehicle').textContent=inv.customer.vehicle||'-';
+  document.getElementById('inv-cgst-no').textContent=inv.customer.gst||'-';
+  document.getElementById('inv-date').textContent=inv.date;
+  document.getElementById('inv-num').textContent=inv.invNum;
+  const tbody=document.getElementById('inv-rows');tbody.innerHTML='';
+  let sno=1,subtotal=0;
+  inv.bill.forEach((g,gi)=>{
+    const bg=gi%2===0?'#fff':'#fafafa';
+    g.items.forEach(item=>{const tr=document.createElement('tr');tr.innerHTML=`<td style="text-align:center;background:${bg};">${sno++}</td><td style="background:${bg};">${g.species}</td><td style="text-align:center;background:${bg};">${item.pieces}</td><td style="text-align:right;background:${bg};">${item.cft.toFixed(4)}</td><td style="text-align:right;background:${bg};">—</td><td style="text-align:right;background:${bg};">—</td>`;tbody.appendChild(tr);});
+    const amt=g.totalCFT*g.rate;subtotal+=amt;
+    const str=document.createElement('tr');str.className='sub-row';str.innerHTML=`<td colspan="3" style="text-align:right;font-style:italic;">Total CFT (${g.species})</td><td style="text-align:right;">${g.totalCFT.toFixed(4)}</td><td style="text-align:right;">₹${g.rate.toLocaleString('en-IN')}</td><td style="text-align:right;">₹${Math.round(amt).toLocaleString('en-IN')}</td>`;tbody.appendChild(str);
+  });
+  const cp=inv.gst.cgst,sp=inv.gst.sgst,ip=inv.gst.igst;
+  const ca=subtotal*cp/100,sa=subtotal*sp/100,ia=subtotal*ip/100,grand=subtotal+ca+sa+ia;
+  document.getElementById('inv-sub').textContent='₹'+Math.round(subtotal).toLocaleString('en-IN');
+  document.getElementById('inv-cl').textContent='CGST ('+cp+'%)';document.getElementById('inv-cv').textContent='₹'+Math.round(ca).toLocaleString('en-IN');
+  document.getElementById('inv-sl').textContent='SGST ('+sp+'%)';document.getElementById('inv-sv').textContent='₹'+Math.round(sa).toLocaleString('en-IN');
+  document.getElementById('inv-il').textContent='IGST ('+ip+'%)';document.getElementById('inv-iv').textContent='₹'+Math.round(ia).toLocaleString('en-IN');
+  document.getElementById('inv-grand').textContent='₹'+Math.round(grand).toLocaleString('en-IN');
+  document.getElementById('inv-rupees-words').textContent=numToWords(Math.round(grand));
+  const tb=document.getElementById('inv-terms-blk');
+  if(inv.shop.terms){document.getElementById('inv-terms-txt').textContent=inv.shop.terms;tb.style.display='block';}else tb.style.display='none';
+}
+
+// ---- Generate Bill ----
+document.getElementById('gen-bill-btn').addEventListener('click',async()=>{
+  const invNum='INV-'+invCounter++;
+  const now=new Date();
+  const dateTime=now.toLocaleDateString('en-IN')+' '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const inv={invNum,date:dateTime,shop:{...shop},customer:{name:document.getElementById('cust-name').value||'-',phone:document.getElementById('cust-phone').value||'-',vehicle:document.getElementById('cust-vehicle').value||'-',addr:document.getElementById('cust-addr').value||'-',gst:document.getElementById('cust-gst').value||'-'},bill:JSON.parse(JSON.stringify(bill)),gst:{cgst:parseFloat(document.getElementById('cgst-pct').value)||0,sgst:parseFloat(document.getElementById('sgst-pct').value)||0,igst:parseFloat(document.getElementById('igst-pct').value)||0}};
+
+  renderScreenInvoice(inv);
+  document.getElementById('bill-edit').style.display='none';
+  document.getElementById('bill-invoice').style.display='block';
+
+  try{
+    showOverlay('Building PDF...');
+    const doc=buildPDF(inv);
+    const pdfBlob=doc.output('blob');
+
+    showOverlay('Uploading to Google Drive...');
+    const driveLink=await uploadPDFToDrive(pdfBlob,invNum+'_'+(inv.customer.name||'Bill')+'.pdf');
+
+    showOverlay('Saving to Google Sheets...');
+    await saveToSheet(invNum,inv.customer.name,inv.customer.vehicle,driveLink,inv.date);
+
+    hideOverlay();
+    showToast('✅ Sharp PDF saved to Drive & logged in Sheets!');
+  }catch(e){
+    hideOverlay();
+    showToast('⚠️ Bill shown but cloud save failed. Check Drive API scope.');
+    console.error(e);
+  }
+  bill=[];renderBillBanner();
+});
+
+document.getElementById('edit-inv-btn').addEventListener('click',()=>{document.getElementById('bill-invoice').style.display='none';document.getElementById('bill-edit').style.display='block';});
+document.getElementById('print-inv-btn').addEventListener('click',()=>window.print());
+
+// ---- Calc history ----
+function renderCalcHist(){const el=document.getElementById('calc-hist-list');if(calcHistory.length===0){el.innerHTML='<div class="empty-msg">No calculations yet.</div>';return;}el.innerHTML='';calcHistory.forEach(h=>{const d=document.createElement('div');d.className='hist-item';d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:13px;font-weight:500;">${h.species}</span><span class="hist-badge">Calc</span></div><div style="font-size:12px;color:#555;">${h.rows} row${h.rows!==1?'s':''} · ${h.totalCFT.toFixed(4)} CFT · ₹${h.rate.toLocaleString('en-IN')}/CFT</div><div style="font-size:13px;font-weight:600;margin-top:4px;">₹${Math.round(h.totalCFT*h.rate).toLocaleString('en-IN')}</div><div style="font-size:10px;color:#bbb;margin-top:2px;">${h.time}</div>`;el.appendChild(d);});}
+</script>
+</body>
+</html>
